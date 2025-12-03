@@ -37,9 +37,9 @@ module "ec2_instance" {
 
   name          = "my-ec2"
   instance_type = "t2.micro"
-  ami           = "ami-0c55b159cbfafe1f0"
+  #ami           = "ami-0c55b159cbfafe1f0"
 
-  subnet_id              = data.aws_subnet.public_1.id
-  vpc_security_group_ids = [data.aws_security_group.default.id]
+  #subnet_id              = data.aws_subnet.public_1.id
+  #vpc_security_group_ids = [data.aws_security_group.default.id]
 }
 
