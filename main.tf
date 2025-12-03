@@ -1,34 +1,4 @@
-##Get existing VPC by Name tag##
-data "aws_vpc" "existing" {
-  filter {
-    name   = "tag:Name"
-    values = ["My_VPC"]
-  }
-}
-##Get all subnets in that VPC##
-data "aws_subnets" "existing" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.existing.id]
-  }
-}
-##Get an existing Security Group##
 
-data "aws_subnet" "public_1" {
-  filter {
-    name   = "tag:Name"
-    values = ["Public_Subent_01"]
-  }
-}
-##Get an existing Security Group##
-data "aws_security_group" "default" {
-  filter {
-    name   = "group-name"
-    values = ["default"]
-  }
-
-  vpc_id = data.aws_vpc.existing.id
-}
 
 
 module "ec2_instance" {
