@@ -31,7 +31,7 @@ data "aws_security_group" "default" {
 }
 
 
-module "ec2" {
+module "ec2_instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "4.2.0"
 
