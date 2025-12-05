@@ -1,19 +1,18 @@
 pipeline {
-    agent { label 'wsl' }
+    agent { label 'wsl-agent' }
 
     environment {
-        AWS_REGION = "ap-south-1"
+        // used for terraform/aws etc if needed
+        PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/opt/sonar-scanner/bin"
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                git(
-                    branch: 'main',
+                git branch: 'main',
                     url: 'https://github.com/gova4all/EC2.git',
                     credentialsId: 'gova_jenkins'
-                )
             }
         }
 
@@ -22,13 +21,11 @@ pipeline {
                 withCredentials([string(credentialsId: 'SonarQube_Creds', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('MySonarServer') {
                         sh '''
-                            export PATH=$PATH:/opt/sonar-scanner/bin
-                            
                             sonar-scanner \
-                                -Dsonar.projectKey=EC2 \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=http://localhost:9000 \
-                                -Dsonar.login=$SONAR_TOKEN
+                              -Dsonar.projectKey=EC2 \
+                              -Dsonar.sources=. \
+                              -Dsonar.host.url=http://localhost:9000 \
+                              -Dsonar.token=$SONAR_TOKEN
                         '''
                     }
                 }
@@ -36,77 +33,49 @@ pipeline {
         }
 
         stage('Quality Gate') {
-    steps {
-        echo "Quality Gate check skipped."
-    }
-}
+            steps {
+                echo "Skipping Quality Gate stage as per your configuration."
+            }
+        }
 
         stage('Terraform Init') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                                  credentialsId: 'AWS_CREDS']]) {
-                    sh '''
-                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-                        export AWS_DEFAULT_REGION=${AWS_REGION}
-
-                        terraform init
-                    '''
-                }
+                sh "terraform init"
             }
         }
 
         stage('Terraform Validate') {
             steps {
-                sh 'terraform validate'
+                sh "terraform validate"
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                                  credentialsId: 'AWS_CREDS']]) {
-                    sh '''
-                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-                        export AWS_DEFAULT_REGION=${AWS_REGION}
-
-                        terraform plan -out=tfplan
-                    '''
-                }
+                sh "terraform plan -out=tfplan"
             }
         }
 
         stage('Terraform Apply') {
-            when { expression { return params.APPLY == true } }
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                                  credentialsId: 'AWS_CREDS']]) {
-                    sh '''
-                        terraform apply -auto-approve tfplan
-                    '''
-                }
+                sh "terraform apply -auto-approve tfplan"
             }
         }
 
         stage('Approval for Destroy') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    input message: "Do you want to destroy the Terraform infrastructure?"
+                script {
+                    input message: 'Do you want to destroy the infrastructure?', ok: 'Yes, Destroy'
                 }
             }
         }
 
         stage('Terraform Destroy') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                                  credentialsId: 'AWS_CREDS']]) {
-                    sh '''
-                        terraform destroy -auto-approve
-                    '''
-                }
+                sh "terraform destroy -auto-approve"
             }
         }
+
     }
 
     post {
