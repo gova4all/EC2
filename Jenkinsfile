@@ -1,5 +1,8 @@
 pipeline {
     agent { label 'wsl-agent' }
+	options {
+        skipDefaultCheckout(true)
+    }
 
     environment {
         // used for terraform/aws etc if needed
