@@ -25,12 +25,10 @@ pipeline {
                 withCredentials([string(credentialsId: 'SonarQube_Creds', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('MySonarServer') {
                         sh '''
-                            HOST_IP=$(grep nameserver /etc/resolv.conf | awk '{print $2}')
-
-                    sonar-scanner \
+                            sonar-scanner \
                       -Dsonar.projectKey=EC2 \
                       -Dsonar.sources=. \
-                      -Dsonar.host.url=http://$HOST_IP:9000 \
+                      -Dsonar.host.url=http://localhost:9000 \
                       -Dsonar.token=$SONAR_TOKEN
                         '''
                     }
