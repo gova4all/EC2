@@ -1,8 +1,6 @@
 pipeline {
     agent { label 'wsl-agent' }
-	options {
-        skipDefaultCheckout(true)
-    }
+	
     tools {
     git 'WSLGit'
 }
