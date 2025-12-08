@@ -23,7 +23,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'SonarQube_Creds', variable: 'SONAR_TOKEN')]) {
-                    withSonarQubeEnv('MySonarServer') {
+                    withSonarQubeEnv('mysonarqube') {
                         sh '''
                             sonar-scanner \
                       -Dsonar.projectKey=EC2 \
