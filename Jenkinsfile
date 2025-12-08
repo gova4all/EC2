@@ -1,12 +1,13 @@
 pipeline {
     agent { label 'build' }
-	
+
     tools {
-    git 'WSLGit'
-}
+        git 'WSLGit'
+        // sonar-scanner tool installed in Jenkins
+        sonarScanner 'sonar-scanner'
+    }
 
     environment {
-        // used for terraform/aws etc if needed
         PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/opt/sonar-scanner/bin"
     }
 
@@ -24,13 +25,15 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'SonarQube_Creds', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('mysonarqube') {
-                        sh '''
+                        sh """
                             sonar-scanner \
-                      -Dsonar.projectKey=EC2 \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=http://localhost:9000 \
-                      -Dsonar.token=$SONAR_TOKEN
-                        '''
+                                -Dsonar.projectKey=EC2 \
+                                -Dsonar.projectName=EC2 \
+                                -Dsonar.sources=. \
+                                -Dsonar.inclusions=**/*.tf \
+                                -Dsonar.host.url=$SONAR_HOST_URL \
+                                -Dsonar.token=$SONAR_TOKEN
+                        """
                     }
                 }
             }
@@ -38,7 +41,14 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                echo "Skipping Quality Gate stage as per your configuration."
+                timeout(time: 5, unit: 'MINUTES') {
+                    script {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Pipeline failed because Quality Gate status is: ${qg.status}"
+                        }
+                    }
+                }
             }
         }
 
