@@ -3,6 +3,9 @@ pipeline {
 	options {
         skipDefaultCheckout(true)
     }
+    tools {
+    git 'WSLGit'
+}
 
     environment {
         // used for terraform/aws etc if needed
