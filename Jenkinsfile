@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'wsl-agent' }
+    agent { label 'build' }
 	
     tools {
     git 'WSLGit'
