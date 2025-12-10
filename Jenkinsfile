@@ -28,7 +28,7 @@ pipeline {
                             sonar-scanner \
                       -Dsonar.projectKey=EC2 \
                       -Dsonar.sources=. \
-                      -Dsonar.host.url=http://192.168.68.102:9000 \
+                      -Dsonar.host.url=http://localhost:9000 \
                       -Dsonar.token=$SONAR_TOKEN
                         '''
                     }
