@@ -18,20 +18,21 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
-                withCredentials([string(credentialsId: 'SonarQube_Creds', variable: 'SONAR_TOKEN')]) {
-                    withSonarQubeEnv('mysonarqube') {
-                        sh '''
-                          sonar-scanner \
-                            -Dsonar.projectKey=EC2 \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.token=$SONAR_TOKEN
-                        '''
-                    }
+        steps {
+            withCredentials([string(credentialsId: 'SonarQube_Creds', variable: 'SONAR_TOKEN')]) {
+                withSonarQubeEnv('mysonarqube') {
+                    sh '''
+                        sonar-scanner \
+                        -Dsonar.projectKey=EC2 \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://sonarqube:9000 \
+                        -Dsonar.token=$SONAR_TOKEN
+                    '''
                 }
             }
         }
+}
+
 
         stage('Quality Gate') {
             steps {
