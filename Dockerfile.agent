@@ -22,4 +22,5 @@ RUN curl -fsSL https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/s
     && ln -s /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner \
     && rm sonar.zip
 
+
 USER jenkins
