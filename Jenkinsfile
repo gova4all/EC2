@@ -1,10 +1,15 @@
-pipeline {
+﻿pipeline {
     agent {
         label 'docker-agent'
     }
 
+    options {
+        skipDefaultCheckout(true)
+        timestamps()
+    }
+
     environment {
-        SONAR_HOST_URL = "http://sonarqube:9000"
+        SONAR_HOST_URL = 'http://sonarqube:9000'
     }
 
     stages {
@@ -18,26 +23,21 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-    steps {
-        withCredentials([string(credentialsId: 'SonarQube_Creds', variable: 'SONAR_TOKEN')]) {
-            withSonarQubeEnv('mysonarqube') {
-                sh '''
-                  sonar-scanner \
-                    -Dsonar.projectKey=EC2 \
-                    -Dsonar.sources=. \
-                    -Dsonar.host.url=http://sonarqube:9000 \
-                    -Dsonar.token=$SONAR_TOKEN
-                '''
+            steps {
+                withSonarQubeEnv('mysonarqube') {
+                    sh '''
+                      sonar-scanner \
+                        -Dsonar.projectKey=EC2 \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=$SONAR_HOST_URL
+                    '''
+                }
             }
         }
-    }
-}
-
-
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -77,6 +77,18 @@ pipeline {
             steps {
                 sh 'terraform destroy -auto-approve'
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline completed successfully.'
+        }
+        failure {
+            echo '❌ Pipeline failed. Check logs above.'
+        }
+        aborted {
+            echo '⚠️ Pipeline aborted by user or Quality Gate.'
         }
     }
 }
