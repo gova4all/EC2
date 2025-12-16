@@ -9,24 +9,6 @@ pipeline {
 
     stages {
 
-        stage('Install Tools') {
-            steps {
-                sh '''
-                  apt-get update
-                  apt-get install -y unzip curl git
-
-                  # Install Terraform
-                  if ! command -v terraform >/dev/null; then
-                    curl -fsSL https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip -o terraform.zip
-                    unzip terraform.zip
-                    mv terraform /usr/local/bin/
-                  fi
-
-                  terraform -version
-                '''
-            }
-        }
-
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
