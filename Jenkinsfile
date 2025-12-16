@@ -13,7 +13,10 @@ pipeline {
     }
 
     stages {
-
+            stage('Debug Sonar Env') {
+            steps {
+                sh 'env | grep -i sonar'
+            }
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
