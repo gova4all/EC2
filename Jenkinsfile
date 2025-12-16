@@ -13,10 +13,7 @@ pipeline {
     }
 
     stages {
-            stage('Debug Sonar Env') {
-            steps {
-                sh 'env | grep -i sonar'
-            }
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
@@ -81,7 +78,8 @@ pipeline {
                 sh 'terraform destroy -auto-approve'
             }
         }
-    }
+
+    } // end stages
 
     post {
         success {
@@ -94,4 +92,5 @@ pipeline {
             echo '⚠️ Pipeline aborted.'
         }
     }
-}
+
+} // end pipeline
